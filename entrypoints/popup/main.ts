@@ -4,7 +4,22 @@ import { extractPatterns, type Preset } from '../../src/core/patterns';
 import { formatMatches, type ExportFormat } from '../../src/core/exports';
 
 const MAX_PAGE_CHARACTERS = 250_000;
+const SCAN_TIMEOUT_MS = 15_000;
 declare const __WPE_E2E__: boolean;
+
+async function withTimeout<T>(operation: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutId = 0;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<never>((_resolve, reject) => {
+        timeoutId = window.setTimeout(() => reject(new Error('Scan timed out')), timeoutMs);
+      }),
+    ]);
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 // This injected function MUST be self-contained. Chrome serializes it into the webpage.
 function readTabText(preferSelection: boolean, maxChars: number) {
@@ -61,11 +76,11 @@ form.addEventListener('submit', async (event) => {
         .sort((left, right) => (right.lastAccessed ?? 0) - (left.lastAccessed ?? 0))[0];
     }
     if (tab?.id == null) throw new Error('No active webpage was found.');
-    const [result] = await browser.scripting.executeScript({
+    const [result] = await withTimeout(browser.scripting.executeScript({
       target: { tabId: tab.id },
       func: readTabText,
       args: [useSelection.checked, MAX_PAGE_CHARACTERS],
-    });
+    }), SCAN_TIMEOUT_MS);
     if (!result?.result) throw new Error('No text was returned from this tab.');
     const content = result.result;
     const extracted = extractPatterns(content.text, select.value as Preset);

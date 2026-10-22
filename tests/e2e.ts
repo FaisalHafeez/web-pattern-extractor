@@ -48,25 +48,30 @@ try {
 
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-  const scan = async () => {
+  const scan = async (label: string) => {
+    console.log(`E2E scan: ${label}`);
     await popup.getByRole('button', { name: 'Scan current page' }).click();
-    await popup.waitForFunction(() => !document.querySelector<HTMLButtonElement>('#scan')?.disabled);
+    try {
+      await popup.waitForFunction(() => !document.querySelector<HTMLButtonElement>('#scan')?.disabled, { timeout: 20_000 });
+    } catch {
+      throw new Error(`Scan did not finish (${label}); status: ${await popup.locator('#status').innerText()}`);
+    }
   };
 
-  await scan();
+  await scan('page email extraction');
   assert.equal(await popup.locator('#matches').inputValue(), 'docs@example.org\nops@example.org\nselected@example.net');
   assert.match(await popup.locator('#status').innerText(), /Page scanned/);
 
   await popup.locator('#useSelection').uncheck();
   await popup.locator('#preset').selectOption('url');
-  await scan();
+  await scan('page URL extraction');
   assert.equal(await popup.locator('#matches').inputValue(), 'https://example.org/docs\nhttps://selected.example/path');
 
   await popup.locator('#preset').selectOption('iso-date');
-  await scan();
+  await scan('ISO date extraction');
   assert.equal(await popup.locator('#matches').inputValue(), '2026-10-22');
   await popup.locator('#preset').selectOption('hex-color');
-  await scan();
+  await scan('hex color extraction');
   assert.equal(await popup.locator('#matches').inputValue(), '#2A61D8');
 
   await hostPage.evaluate(() => {
@@ -83,7 +88,7 @@ try {
   });
   await popup.locator('#useSelection').check();
   await popup.locator('#preset').selectOption('email');
-  await scan();
+  await scan('selected text extraction');
   assert.equal(await popup.locator('#matches').inputValue(), 'selected@example.net');
   assert.match(await popup.locator('#status').innerText(), /Selection scanned/);
 
@@ -104,30 +109,30 @@ try {
   pageMarkup = '<!doctype html><html><body><p>No matching values.</p></body></html>';
   await hostPage.goto(fixtureUrl);
   await popup.locator('#preset').selectOption('email');
-  await scan();
+  await scan('empty state');
   assert.equal(await popup.locator('#matches').inputValue(), '');
   assert.equal(await popup.locator('#copy').isDisabled(), true);
   assert.equal(await popup.locator('#download').isDisabled(), true);
   assert.match(await popup.locator('#count').innerText(), /0 found/);
 
   await hostPage.goto('chrome://version');
-  await scan();
+  await scan('unsupported browser page');
   assert.match(await popup.locator('#status').innerText(), /can.t access this page/i);
 
   pageMarkup = fixture;
   await hostPage.goto(deniedUrl);
-  await scan();
+  await scan('denied host permission');
   assert.match(await popup.locator('#status').innerText(), /can.t access this page/i);
 
   pageMarkup = `<html><body><p>${'x'.repeat(250_001)} capped@example.org</p></body></html>`;
   await hostPage.goto(fixtureUrl);
-  await scan();
+  await scan('source text truncation');
   assert.equal(await popup.locator('#matches').inputValue(), '');
   assert.match(await popup.locator('#status').innerText(), /text scan capped/);
 
   pageMarkup = `<html><body><p>${Array.from({ length: 501 }, (_, index) => `person${index}@example.org`).join(' ')}</p></body></html>`;
   await hostPage.goto(fixtureUrl);
-  await scan();
+  await scan('match count truncation');
   assert.equal((await popup.locator('#matches').inputValue()).split('\n').length, 500);
   assert.match(await popup.locator('#status').innerText(), /match list capped/);
 
