@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>Web Pattern Extractor</title>
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <span class="eyebrow">LOCAL-FIRST BROWSER UTILITY</span>
+        <h1>Web Pattern Extractor</h1>
+        <p>Find useful data in selected text or the current webpage.</p>
+      </header>
+
+      <form id="scanForm" class="form">
+        <label for="preset">Find</label>
+        <select name="preset" id="preset">
+          <option value="email">Email addresses</option>
+          <option value="url">Web URLs in text</option>
+          <option value="iso-date">ISO dates (YYYY-MM-DD)</option>
+          <option value="hex-color">Hex colors (#RRGGBB)</option>
+        </select>
+        <label class="check"><input type="checkbox" id="useSelection" checked /> Use selected text when available</label>
+        <button type="submit" id="scan">Scan current page</button>
+      </form>
+
+      <section class="results" aria-label="Extraction results">
+        <div class="resultsHead"><strong>Matches</strong><span id="count">0 found</span></div>
+        <p class="status" id="status" role="status">Choose a pattern and scan a webpage.</p>
+        <textarea id="matches" readonly spellcheck="false" placeholder="Results appear here"></textarea>
+        <div class="toolbar">
+          <label class="srOnly" for="format">Export format</label>
+          <select id="format" aria-label="Export format"><option value="txt">TXT</option><option value="csv">CSV</option><option value="json">JSON</option></select>
+          <button id="copy" type="button" class="secondary" disabled>Copy</button>
+          <button id="download" type="button" class="secondary" disabled>Download</button>
+        </div>
+      </section>
+      <footer>On-demand scan · No account · No tracking</footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

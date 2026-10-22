@@ -1,0 +1,40 @@
+# Installed dependencies and generated WXT output
+node_modules/
+.wxt/
+.output/
+.output-e2e/
+dist/
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+*.log
+
+# Local configuration, credentials, generated reports
+.env
+.env.*
+!.env.example
+*.local.*
+*.pem
+*.key
+
+# PRIVATE project planning and AI-agent instructions (included in handoff zip, never on GitHub)
+/docs/
+/internal/
+/AGENTS.md
+**/AGENTS.md
+/CLAUDE.md
+**/CLAUDE.md
+/GEMINI.md
+**/GEMINI.md
+/.codex/
+/.cursor/
+/.agent/
+/.agents/
+/.aider*
+/.windsurf/
+/.github/copilot-instructions.md
+*.private.md
+*.local.md
+
+# README.md is intentionally PUBLIC and tracked.

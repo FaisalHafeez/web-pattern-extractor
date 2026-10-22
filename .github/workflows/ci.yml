@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Verify production permissions
+        run: >-
+          bun -e 'const m = await Bun.file(".output/chrome-mv3/manifest.json").json();
+          if (JSON.stringify(m.permissions) !== JSON.stringify(["activeTab", "scripting"]) || m.host_permissions) process.exit(1)'
+      - run: bun run zip
+      - run: bunx playwright install --with-deps chromium
+      - run: xvfb-run -a bun run test:e2e

@@ -1,0 +1,51 @@
+{
+  "name": "web-pattern-extractor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first Chrome extension for extracting emails, URLs, ISO dates, and hex colors from selected text or webpages.",
+  "author": {
+    "name": "Faisal Hafeez",
+    "url": "https://faisalhafeez.com"
+  },
+  "homepage": "https://faisalhafeez.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FaisalHafeez/web-pattern-extractor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FaisalHafeez/web-pattern-extractor/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "pattern-extractor",
+    "text-extraction",
+    "data-extraction",
+    "email-extraction",
+    "url-extraction",
+    "webpage-text",
+    "csv",
+    "wxt"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "build:e2e": "WPE_E2E=1 wxt build",
+    "zip": "wxt zip",
+    "prepare": "wxt prepare",
+    "test": "bun test tests/*.test.ts",
+    "test:e2e": "bun run build:e2e && bun run tests/e2e.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run test && bun run typecheck && bun run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3",
+    "wxt": "^0.21.4"
+  }
+}
