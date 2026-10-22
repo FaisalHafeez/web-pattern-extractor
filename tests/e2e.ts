@@ -50,9 +50,14 @@ try {
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   const scan = async (label: string) => {
     console.log(`E2E scan: ${label}`);
+    await popup.bringToFront();
     await popup.getByRole('button', { name: 'Scan current page' }).click();
     try {
-      await popup.waitForFunction(() => !document.querySelector<HTMLButtonElement>('#scan')?.disabled, { timeout: 20_000 });
+      await popup.waitForFunction(
+        () => !document.querySelector<HTMLButtonElement>('#scan')?.disabled,
+        undefined,
+        { timeout: 20_000 },
+      );
     } catch {
       throw new Error(`Scan did not finish (${label}); status: ${await popup.locator('#status').innerText()}`);
     }
