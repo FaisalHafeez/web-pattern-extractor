@@ -52,7 +52,7 @@ bun run zip
 bun run test:e2e
 ```
 
-WXT writes the unpacked production extension to `.output/chrome-mv3/` and the ZIP to `.output/`. The E2E suite builds a separate unpacked test copy in `.output-e2e/` and launches it in a persistent Playwright Chromium profile with a test-only localhost permission. The production build retains only `activeTab` and `scripting` permissions and no host permissions.
+WXT writes the unpacked production extension to `.output/chrome-mv3/` and the ZIP to `.output/`. The E2E suite builds a separate unpacked test copy in `.output-e2e/` and launches it in a persistent Playwright Chromium profile with a test-only localhost permission. CI stubs the operating-system clipboard boundary because Xvfb has no system clipboard; it checks that the Copy action sends the selected export text. The production build retains only `activeTab` and `scripting` permissions and no host permissions.
 
 ## Project
 

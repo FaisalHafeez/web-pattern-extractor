@@ -47,6 +47,19 @@ try {
   await extensionsPage.close();
 
   const popup = await context.newPage();
+  if (process.env.CI) {
+    // Xvfb has no system clipboard. Keep the extension's Clipboard API boundary deterministic in CI.
+    await popup.addInitScript(() => {
+      let copiedText = '';
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: {
+          writeText: async (text: string) => { copiedText = text; },
+          readText: async () => copiedText,
+        },
+      });
+    });
+  }
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   const scan = async (label: string) => {
     console.log(`E2E scan: ${label}`);
@@ -99,7 +112,7 @@ try {
 
   await popup.locator('#format').selectOption('json');
   await popup.getByRole('button', { name: 'Copy' }).click();
-  await popup.waitForFunction(async () => (await navigator.clipboard.readText()) === '[\n  "selected@example.net"\n]\n');
+  assert.equal(await popup.evaluate(() => navigator.clipboard.readText()), '[\n  "selected@example.net"\n]\n');
   assert.match(await popup.locator('#status').innerText(), /Copied to clipboard/);
 
   await popup.locator('#format').selectOption('csv');
